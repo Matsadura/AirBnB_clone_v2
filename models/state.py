@@ -16,7 +16,7 @@ class State(BaseModel, Base):
                           cascade="all, delete-orphan")
 
     # Getter in case of storage type is FileStorage
-    if getenv('HBNB_TYPE_STORAGE') == db:
+    if getenv('HBNB_TYPE_STORAGE') != 'db':
         @property
         def cities(self):
             from models import storage
