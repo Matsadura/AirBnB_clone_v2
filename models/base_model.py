@@ -74,8 +74,10 @@ class BaseModel:
         dictionary['created_at'] = self.created_at.isoformat()
         dictionary['updated_at'] = self.updated_at.isoformat()
         # Remove _sa_instance_state only if this key exists
-        if '_sa_instance_state' in dictionary.items():
+        try:
             del(dictionary['_sa_instance_state'])
+        except Exception as e:
+            pass
         return dictionary
 
     # delete the current instance from the storage
