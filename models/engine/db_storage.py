@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """ A module that contains the class engine DBStorage """
 from os import getenv
-from sqlalchemy import (create_engine)
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 # Getting the value of the enviromental variables
@@ -68,7 +68,7 @@ class DBStorage():
         from models.review import Review
         from models.amenity import Amenity
         # Create all tables in the database
-        Base.metadata.create_all(engine)
+        Base.metadata.create_all(self.__engine)
         # Creating the current database session
         self.__session = sessionmaker(bind=self.__engine,
                                       expire_on_commit=False)
