@@ -47,6 +47,7 @@ class DBStorage():
             for obj in obj_cls:
                 key = obj.__class__.__name__ + "." + str(obj.id)
                 objects[key] = obj
+        return objects
 
     def new(self, obj):
         """ Adds the object to the current database session """
