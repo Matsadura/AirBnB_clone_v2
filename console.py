@@ -114,7 +114,8 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    # REEDID Create, it was the one causing FileStorage to not save the created instances
+    # REDONE Create, it was the one causing FileStorage
+    # to not save the created instances
     def do_create(self, args):
         if not args:
             print("** class name missing **")
@@ -210,7 +211,6 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the destroy command """
         print("Destroys an individual instance of a class")
         print("[Usage]: destroy <className> <objectId>\n")
-
 
     def do_all(self, args):
         """ Shows all objects, or all objects of a class"""

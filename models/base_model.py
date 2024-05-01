@@ -34,7 +34,7 @@ class BaseModel:
                     setattr(self, k, datetime.fromisoformat(v))
                 else:
                     setattr(self, k, v)
-    
+
     def __str__(self):
         """Returns a string representation of the instance"""
         new_dict = self.__dict__
@@ -74,10 +74,8 @@ class BaseModel:
         dictionary['created_at'] = self.created_at.isoformat()
         dictionary['updated_at'] = self.updated_at.isoformat()
         # Remove _sa_instance_state only if this key exists
-        try:
+        if '_sa_instance_state' in dictionary.items():
             del(dictionary['_sa_instance_state'])
-        except:
-            pass
         return dictionary
 
     # delete the current instance from the storage
