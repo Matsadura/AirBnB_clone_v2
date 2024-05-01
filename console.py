@@ -3,7 +3,6 @@
 import re
 import cmd
 import sys
-import shlex
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -79,7 +78,7 @@ class HBNBCommand(cmd.Cmd):
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
-                        # _args = pline.replace(',', '')
+                        _args = pline.replace(',', '')
                         _args = _args.replace('\"', '')
             line = ' '.join([_cmd, _cls, _id, _args])
 
@@ -115,55 +114,31 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
+    # REEDID Create, it was the one causing FileStorage to not save the created instances
     def do_create(self, args):
-        """ Create an object of any class"""
         if not args:
             print("** class name missing **")
             return
-        # If only the class passed
-        elif args in HBNBCommand.classes:
-            new_instance = HBNBCommand.classes[args]()
-            storage.save()
-            print(new_instance.id)
-            storage.save()
+        params = args.split(" ")
+        if params[0] not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return
 
-        else:
-            dict_args = {}
-            cls_name = args[:args.find(' ')]
-            if cls_name not in HBNBCommand.classes:
-                print("** class doesn't exist **")
-                return
-            # We split the parameters to check for its type
-            restOfArgs = args[args.find(' ') + 1:].split()
-            # we loop over each arg and split based on =
-            for arg in restOfArgs:
-                key = arg[:arg.find('=')]
-                value_index = arg.find('=') + 1
-            # if arg has " we start from the opening " to
-            # the closing " + 1 to take the entire value
-                if '"' in arg:
-                    value = arg[value_index + 1:arg.rfind('"')]
-                    value = value.replace('_', ' ')
-                    value = value.replace('"', '\"')
-            # then we eval its type if it is not string if it int
-            # then it can't be None we skip it
-                else:
-                    try:
-                        value = eval(arg[value_index:])
-                    except SyntaxError:
-                        continue
-            # last we check if the value is not none or an empty string " "
-            # we skip it from adding to dict
-                if value not in ('""', None):
-                    dict_args[key] = value
+        new_instance = HBNBCommand.classes[params[0]]()
+        if len(params) > 1:
+            for arg in params[1:]:
+                if not re.match(r"^\S*=\S*$", arg):
+                    continue
+                key, value = arg.split('=')
 
-            new_instance = HBNBCommand.classes[cls_name]()
-            storage.save()
-            for key, value in dict_args.items():
+                if not re.match(r"^-?\d*\.\d*$|^-?\d*$|^\"\S*\"$", value):
+                    continue
+                value = value.replace('_', " ")
+                value = value.replace('"', '')
                 setattr(new_instance, key, value)
-            storage.save()
-
-            print(new_instance.id)
+        storage.new(new_instance)
+        storage.save()
+        print(new_instance.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -236,6 +211,7 @@ class HBNBCommand(cmd.Cmd):
         print("Destroys an individual instance of a class")
         print("[Usage]: destroy <className> <objectId>\n")
 
+
     def do_all(self, args):
         """ Shows all objects, or all objects of a class"""
         print_list = []
@@ -245,12 +221,13 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
+
+            for k, v in storage.all(HBNBCommand.classes[args]).items():
                 if k.split('.')[0] == args:
-                    print_list.append(str(v))
+                    print_list.append(v)
         else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
+            for k, v in storage.all().items():
+                print_list.append(v)
 
         print(print_list)
 
