@@ -8,7 +8,7 @@ from models.city import City
 from models.user import User
 from models.amenity import Amenity
 
-
+# Table for creating the relationship Many-To-Many between Place and Amenity.
 place_amenity = Table('place_amenity', Base.metadata,
                       Column('place_id', String(60), ForeignKey('places.id'),
                              primary_key=True, nullable=False),
