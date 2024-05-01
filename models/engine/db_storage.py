@@ -24,12 +24,28 @@ class DBStorage():
         """ Instantiation of attributes """
         self.__engine = create_engine(url, pool_pre_ping=True)
 
-        # TO DO : Drop All tables if env_var HBNB_ENV equals "test"
+        # Drop All tables if env_var HBNB_ENV equals "test"
+        if hbnb_env == 'test':
+            self.__engine.execute("DROP TABLE IF EXISTS {}".format(hbnb_env))
 
-    # TO DO
     def all(self, cls=None):
         """ Return the query of all objects """
-        pass
+        objects = {}
+        # if cls_name is not given we loop over all classes
+        if cls is None:
+            classes = [User, State, City, Amenity, Place, Review]
+            for cls in classes:
+                objs_cls = self.__session.query(cls).all()
+                # we loop over the query to get all objs of cls
+                for obj in objs_cls:
+                    key = obj.__class__.__name__ + "." + str(obj.id)
+                    objects[key] = obj
+        # if cls_name is not given we just get all objs of the given cls
+        else:
+            obj_cls = self.__session.query(cls).all()
+            for obj in obj_cls:
+                key = obj.__class__.__name__ + "." + str(obj.id)
+                objects[key] = obj
 
     def new(self, obj):
         """ Adds the object to the current database session """
@@ -46,11 +62,14 @@ class DBStorage():
 
     def reload(self):
         """ Creates all tables and thecurrent database session """
-        # TO DO : Create all tables in the database
-
+        from models.state import State
+        from models.user import User
+        from models.place import Place
+        from models.review import Review
+        from models.amenity import Amenity
+        # Create all tables in the database
+        Base.metadata.create_all(engine)
         # Creating the current database session
         self.__session = sessionmaker(bind=self.__engine,
                                       expire_on_commit=False)
         self.__session = scoped_session(self.__session)
-
-
