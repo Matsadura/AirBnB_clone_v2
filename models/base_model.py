@@ -28,7 +28,7 @@ class BaseModel:
             # and calling it before storage.save()
             # storage.new(self) """ MOVED """
 
-        #else:
+        # else:
         #    kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
         #                                             '%Y-%m-%dT%H:%M:%S.%f')
         #    kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
@@ -39,13 +39,13 @@ class BaseModel:
         # This is from my version (if it doesn't work we restore the one above)
         # This is related to the kwargs={ 'name': "California" } part
         elif len(kwargs) != 0:
-             for k, v in kwargs.items():
-                 if k == "__class__":
-                     continue
-                 elif k == "created_at" or k == "updated_at":
-                     setattr(self, k, datetime.fromisoformat(v))
-                 else:
-                     setattr(self, k, v)
+            for k, v in kwargs.items():
+                if k == "__class__":
+                    continue
+                elif k == "created_at" or k == "updated_at":
+                    setattr(self, k, datetime.fromisoformat(v))
+                else:
+                    setattr(self, k, v)
 
     def __str__(self):
         """Returns a string representation of the instance"""
