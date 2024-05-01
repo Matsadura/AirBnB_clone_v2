@@ -27,6 +27,8 @@ class BaseModel:
             self.updated_at = datetime.now()
 
         elif len(kwargs) != 0:
+            if 'id' not in kwargs:
+                raise KeyError
             for k, v in kwargs.items():
                 if k == "__class__":
                     continue
