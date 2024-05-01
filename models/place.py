@@ -31,12 +31,13 @@ class Place(BaseModel, Base):
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
     amenity_ids = []
-    amenities = relationship("Amenity", secondary=place_amenity,
-                             viewonly=False)
 
     if getenv('HBNB_TYPE_STORAGE') == 'db':
         reviews = relationship('Review', backref='place',
                                cascade='all, delete, delete-orphan')
+        amenities = relationship("Amenity", secondary=place_amenity,
+                                 viewonly=False)
+
     else:
         @property
         def reviews(self):
@@ -54,5 +55,5 @@ class Place(BaseModel, Base):
         @amenities.setter
         def amenities(self, obj):
             """ Setter for amenities attribute """
-            if type(obj) == Amenity:
+            if type(obj) == Amenity and obj.id not in self.amenity_ids:
                 self.amenity_ids.append(obj.id)
