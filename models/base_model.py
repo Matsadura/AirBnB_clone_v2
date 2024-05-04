@@ -20,6 +20,7 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """Instatntiates a new model"""
+        keys = self.get_keys()
         if not kwargs:
             from models import storage
             self.id = str(uuid.uuid4())
@@ -28,14 +29,25 @@ class BaseModel:
 
         elif len(kwargs) != 0:
             if 'id' not in kwargs:
-                raise KeyError
+                self.id = str(uuid.uuid4())
+            keys = self.get_keys()
             for k, v in kwargs.items():
+                if k not in keys:
+                    raise KeyError
                 if k == "__class__":
                     continue
                 elif k == "created_at" or k == "updated_at":
                     setattr(self, k, datetime.fromisoformat(v))
                 else:
                     setattr(self, k, v)
+
+    def get_keys(self):
+        """ Return a list of keys for all classes """
+        return ['id', 'created_at', 'updated_at', '__class__', 'email',
+                'password', 'first_name', 'last_name', 'name', 'place_id',
+                'user_id', 'text', 'city_id', 'description', 'number_rooms',
+                'number_bathrooms', 'max_guest', 'price_by_night', 'latitude',
+                'longitude', 'state_id']
 
     def __str__(self):
         """Returns a string representation of the instance"""
