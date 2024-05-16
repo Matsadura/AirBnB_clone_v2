@@ -12,14 +12,16 @@ for folder in "${FOLDERS[@]}"; do
 	mkdir -p "$folder"
 done
 
-# Change ownership of data recursivly
-chown -R ubuntu:ubuntu /data
+echo "Testing nginx config" > /data/web_static/releases/test/index.html
 
 # Remove sym link and recreate it
 if [[ -L /data/web_static/current ]]; then
 	rm /data/web_static/current
 fi
-ln -s /data/web_static/release/test/ /data/web_static/current
+ln -s /data/web_static/releases/test /data/web_static/current
+
+# Change ownership of data recursivly
+chown -R ubuntu:ubuntu /data
 
 # Update Nginx configuration
 sed -i "56i\ \tlocation /hbnb_static {\n \
