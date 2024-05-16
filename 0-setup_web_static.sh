@@ -21,7 +21,7 @@ fi
 ln -s /data/web_static/releases/test /data/web_static/current
 
 # Change ownership of data recursivly
-chown -R ubuntu:ubuntu /data
+chown -hR ubuntu:ubuntu /data
 
 # Update Nginx configuration
 sed -i "56i\ \tlocation /hbnb_static {\n \
