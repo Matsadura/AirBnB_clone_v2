@@ -24,7 +24,7 @@ ln -s /data/web_static/releases/test /data/web_static/current
 chown -hR ubuntu:ubuntu /data
 
 # Update Nginx configuration
-sed -i "56i\ \tlocation /hbnb_static {\n \
+sed -i "24i\ \tlocation /hbnb_static {\n \
 \t\talias /data/web_static_/current/;\n\
 \t}" /etc/nginx/sites-available/default
 
