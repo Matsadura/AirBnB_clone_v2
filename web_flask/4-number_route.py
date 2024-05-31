@@ -34,7 +34,7 @@ def python(text="is cool"):
 @app.route("/number/<n>", strict_slashes=False)
 def is_number(n):
     """ Displays 'n is number' only if n is an integer """
-    if type(eval(escape(n))) is int:
+    if n.isdigit():
         return f"{escape(n)} is a number"
     abort(404)
 
