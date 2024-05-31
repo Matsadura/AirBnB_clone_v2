@@ -35,7 +35,7 @@ def python(text="is cool"):
 @app.route("/number/<n>", strict_slashes=False)
 def is_number(n):
     """ Displays 'n is number' only if n is an integer """
-    if type(eval(escape(n))) is int:
+    if n.isdigit():
         return f"{escape(n)} is a number"
     abort(404)
 
@@ -43,7 +43,7 @@ def is_number(n):
 @app.route("/number_template/<n>", strict_slashes=False)
 def Number(n):
     """ Displays a HTML page only if n is an integer """
-    if (type(eval(escape(n)))) is int:
+    if n.isdigit():
         return render_template('5-number.html', n=n)
     abort(404)
 
