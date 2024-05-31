@@ -66,3 +66,7 @@ class FileStorage:
             if obj_key in FileStorage.__objects:
                 # delete the object
                 del(FileStorage.__objects[obj_key])
+
+    def close(self):
+        """ Public method that calls reload for deserializing """
+        self.reload()
