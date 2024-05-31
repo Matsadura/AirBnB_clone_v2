@@ -53,7 +53,7 @@ class BaseModel:
         """Returns a string representation of the instance"""
         new_dict = self.__dict__
         try:
-            del (new_dict["_sa_instance_state"])
+            del(new_dict["_sa_instance_state"])
         except KeyError:
             pass
         cls = (str(type(self)).split('.')[-1]).split('\'')[0]
@@ -63,7 +63,7 @@ class BaseModel:
         """Returns a string representation of the instance"""
         new_dict = self.__dict__
         try:
-            del (new_dict["_sa_instance_state"])
+            del(new_dict["_sa_instance_state"])
         except KeyError:
             pass
         cls = (str(type(self)).split('.')[-1]).split('\'')[0]
@@ -72,11 +72,9 @@ class BaseModel:
     def save(self):
         """Updates updated_at with current time when instance is changed"""
         from models import storage
-        self.updated_at = datetime.now()
-
+        self.__dict__["updated_at"] = datetime.now()
         # The moved storage.new(self) from __init__
         storage.new(self)
-
         storage.save()
 
     def to_dict(self):
@@ -85,8 +83,11 @@ class BaseModel:
         dictionary.update(self.__dict__)
         dictionary.update({'__class__':
                           (str(type(self)).split('.')[-1]).split('\'')[0]})
-        dictionary['created_at'] = self.created_at.isoformat()
-        dictionary['updated_at'] = self.updated_at.isoformat()
+        try:
+            dictionary['created_at'] = self.created_at.isoformat()
+            dictionary['updated_at'] = self.updated_at.isoformat()
+        except Exception as e:
+            pass
         # Remove _sa_instance_state only if this key exists
         try:
             del(dictionary['_sa_instance_state'])
