@@ -1,76 +1,92 @@
 #!/usr/bin/python3
 """
-This script Starts a Flask web application.
+script starts Flask web app
+    listen on 0.0.0.0, port 5000
+    routes: /:                    display "Hello HBNB!"
+            /hbnb:                display "HBNB"
+            /c/<text>:            display "C" + text (replace "_" with " ")
+            /python/<text>:       display "Python" + text (default="is cool")
+            /number/<n>:          display "n is a number" only if int
+            /number_template/<n>: display HTML page only if n is int
+            /number_odd_or_even/<n>: display HTML page; display odd/even info
+            /states_list:         display HTML and state info from storage;
 """
-
-from flask import Flask, render_template
 from models import storage
-from models.state import State
-
+from models import *
+from flask import Flask, render_template
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 
-@app.route('/', strict_slashes=False)
+@app.route('/')
 def hello_hbnb():
-    """ this func Displays 'Hello HBNB!' """
-    return 'Hello HBNB!'
+    """display text"""
+    return "Hello HBNB!"
 
 
-@app.route('/hbnb', strict_slashes=False)
+@app.route('/hbnb')
 def hbnb():
-    """ this func Displays HBNB """
-    return 'HBNB'
+    """display text"""
+    return "HBNB"
 
 
-@app.route('/c/<text>', strict_slashes=False)
-def display_C(text):
-    """ this func displays C + some text """
-    return 'C {}'.format(text.replace('_', ' '))
+@app.route('/c/<text>')
+def c_text(text):
+    """display custom text given"""
+    return "C {}".format(text.replace('_', ' '))
 
 
-@app.route('/python/', defaults={'text': 'is cool'}, strict_slashes=False)
-@app.route('/python/<text>', strict_slashes=False)
-def display_python(text):
-    """ this func displays python + some text """
-    return 'Python {}'.format(text.replace('_', ' '))
+@app.route('/python')
+@app.route('/python/<text>')
+def python_text(text="is cool"):
+    """display custom text given
+       first route statement ensures it works for:
+          curl -Ls 0.0.0.0:5000/python ; echo "" | cat -e
+          curl -Ls 0.0.0.0:5000/python/ ; echo "" | cat -e
+    """
+    return "Python {}".format(text.replace('_', ' '))
 
 
-@app.route('/number/<int:n>', strict_slashes=False)
-def number(n):
-    """ this func displays n only if it s an integer"""
-    return '{} is a number'.format(n)
+@app.route('/number/<int:n>')
+def text_if_int(n):
+    """display text only if int given"""
+    return "{:d} is a number".format(n)
 
 
-@app.route('/number_template/<int:n>', strict_slashes=False)
-def number_template(n):
-    """ display an HTML page with the number n"""
+@app.route('/number_template/<int:n>')
+def html_if_int(n):
+    """display html page only if int given
+       place given int into html template
+    """
     return render_template('5-number.html', n=n)
 
 
-@app.route('/number_odd_or_even/<int:n>', strict_slashes=False)
-def number_odd_or_even(n):
+@app.route('/number_odd_or_even/<int:n>')
+def html_odd_or_even(n):
+    """display html page only if int given
+       place given int into html template
+       substitute text to display if int is odd or even
     """
-    this func displays an HTML page with the number n and a message
-    """
-    return render_template(
-            '6-number_odd_or_even.html',
-            n=n,
-            message='even' if n % 2 == 0 else 'odd')
-
-
-@app.route('/states_list', strict_slashes=False)
-def states_list():
-    """ Display a list of all states """
-    states = storage.all(State).values()
-    """sorted_states = sorted(states, key=lambda state: state.name)"""
-    return render_template('7-states_list.html', states=states)
+    odd_or_even = "even" if (n % 2 == 0) else "odd"
+    return render_template('6-number_odd_or_even.html',
+                           n=n, odd_or_even=odd_or_even)
 
 
 @app.teardown_appcontext
-def teardown(exception):
-    """ Close the Session """
+def tear_down(self):
+    """after each request remove current SQLAlchemy session"""
     storage.close()
 
 
+@app.route('/states_list')
+def html_fetch_states():
+    """display html page
+       fetch sorted states to insert into html in UL tag
+    """
+    state_objs = [s for s in storage.all("State").values()]
+    return render_template('7-states_list.html',
+                           state_objs=state_objs)
+
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)
