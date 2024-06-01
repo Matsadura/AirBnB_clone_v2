@@ -1,31 +1,41 @@
 #!/usr/bin/env bash
-# Sets up the web servers for the deployement of web_static
+#  Prepare your web servers
 
-# Install Nginx if not already installed
-if ! [[ -e  /usr/sbin/nginx ]]; then
-	sudo apt-get -y install nginx
+trap 'exit 0' ERR
+
+if ! command -v nginx &> /dev/null; then
+    sudo apt update
+    sudo apt install nginx -y
 fi
 
-# Create folders
-FOLDERS=(/data/web_static/ /data/web_static/releases/ /data/web_static/shared/ /data/web_static/releases/test/)
-for folder in "${FOLDERS[@]}"; do
-	mkdir -p "$folder"
-done
+sudo mkdir -p "/data/web_static/releases/test/"
+sudo mkdir -p "/data/web_static/shared/"
 
-echo "Testing nginx config" > /data/web_static/releases/test/index.html
+body="Holberton School"
+index_content="<html>
+  <head></head>
+  <body>$body</body>
+</html>"
 
-# Remove sym link and recreate it
-if [[ -L /data/web_static/current ]]; then
-	rm /data/web_static/current
+echo "$index_content" | sudo tee "/data/web_static/releases/test/index.html" > /dev/null
+
+rm -rf /data/web_static/current
+ln -sf /data/web_static/releases/test/ /data/web_static/current
+
+sudo chown -hR vega:vega "/data/"
+
+sudo wget -q -O /etc/nginx/sites-available/default http://exampleconfig.com/static/raw/nginx/ubuntu20.04/etc/nginx/sites-available/default
+config="/etc/nginx/sites-available/default"
+
+sudo cp "$config" "$config.bak"
+
+if [ ! -e "$config" ]; then
+    sudo wget -q -O "$config" http://exampleconfig.com/static/raw/nginx/ubuntu20.04/etc/nginx/sites-available/default
 fi
-ln -s /data/web_static/releases/test /data/web_static/current
 
-# Change ownership of data recursivly
-chown -hR ubuntu:ubuntu /data
-
-# Update Nginx configuration
-sed -i "39\ \tlocation /hbnb_static {\n \
-\t\talias /data/web_static/current/;\n\
-\t}" /etc/nginx/sites-available/default
-
-service nginx restart
+sudo sed -i '/^}$/i \ \n\tlocation \/redirect_me {return 301 https:\/\/www.youtube.com\/watch?v=QH2-TGUlwu4;}' $config
+sudo sed -i '/^}$/i \ \n\tlocation @404 {return 404 "Ceci n'\''est pas une page\\n";}' $config
+sudo sed -i 's/=404/@404/g' $config
+sudo sed -i "/^server {/a \ \tadd_header X-Served-By $HOSTNAME;" $config
+sudo sed -i '/^server {/a \ \n\tlocation \/hbnb_static {alias /data/web_static/current/;index index.html;}' $config
+sudo service nginx restart

@@ -8,19 +8,20 @@ class FileStorage:
     __file_path = 'file.json'
     __objects = {}
 
-    def close(self):
-        """"""
-        self.reload()
+    @property
+    def cities(self):
+        """ Returns cities in state"""
 
     def all(self, cls=None):
-        """Returns the list of objects one type of class"""
+        """Returns a dictionary of models currently in storage"""
         if cls:
             new_dict = {}
-            for k, v in self.__objects.items():
-                if cls == v.__class__ or cls == v.__class__.__name__:
-                    new_dict[k] = v
+            for key, value in self.__objects.items():
+                if cls == value.__class__ or cls == value.__class__.__name__:
+                    new_dict[key] = value
             return new_dict
-        return self.__objects
+        else:
+            return self.__objects
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -38,12 +39,12 @@ class FileStorage:
     def reload(self):
         """Loads storage dictionary from file"""
         from models.base_model import BaseModel
+        from models.user import User
+        from models.place import Place
         from models.state import State
         from models.city import City
-        from models.user import User
         from models.amenity import Amenity
         from models.review import Review
-        from models.place import Place
 
         classes = {
                     'BaseModel': BaseModel, 'User': User, 'Place': Place,
@@ -60,10 +61,17 @@ class FileStorage:
             pass
 
     def delete(self, obj=None):
-        """Delete obj from __objects if the give obj is inside"""
-        if obj:
-            key = f"{obj.__class__.__name__}.{obj.id}"
-            try:
+        """delete obj from __objects if it’s inside"""
+        if obj is not None:
+            key = obj.__class__.__name__ + '.' + obj.id
+            if key in self.__objects:
                 del self.__objects[key]
-            except KeyError:
+                self.save()
+            else:
                 pass
+        else:
+            pass
+
+    def close(self):
+        """call reload() for deserializing the JSON file to objects"""
+        self.reload()

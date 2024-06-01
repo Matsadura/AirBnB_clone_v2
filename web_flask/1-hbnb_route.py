@@ -1,21 +1,21 @@
 #!/usr/bin/python3
-""" Starts a Flask web application """
+""" module Hello Flask! """
 from flask import Flask
 
 app = Flask(__name__)
 
 
 @app.route("/", strict_slashes=False)
-def root():
-    """ Displays Hello HBNB """
+def hello():
+    """ def hellowww """
     return "Hello HBNB!"
 
 
 @app.route("/hbnb", strict_slashes=False)
 def hbnb():
-    """ Displays HBNB """
+    """ def hbnb """
     return "HBNB"
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=5000)

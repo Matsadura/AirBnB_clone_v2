@@ -1,28 +1,26 @@
 #!/usr/bin/python3
-""" Starts a Flask web application """
+""" module Hello Flask! """
 from flask import Flask
-from markupsafe import escape
 
 app = Flask(__name__)
 
 
 @app.route("/", strict_slashes=False)
-def root():
-    """ Displays Hello HBNB """
+def hello():
+    """ def hellowww """
     return "Hello HBNB!"
 
 
 @app.route("/hbnb", strict_slashes=False)
 def hbnb():
-    """ Displays HBNB """
+    """ def hbnb """
     return "HBNB"
 
 
 @app.route("/c/<text>", strict_slashes=False)
 def c(text):
-    text = text.replace('_', ' ')
-    return f"C {escape(text)}"
-
+    """ def c """
+    return "C {}".format(text.replace("_", " "))
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=5000)
