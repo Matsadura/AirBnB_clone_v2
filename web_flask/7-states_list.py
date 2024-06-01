@@ -5,6 +5,7 @@ from models import storage
 from models.state import State
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 
 def get_storage(cls=None):
@@ -69,7 +70,7 @@ def number_odd_even(n):
     abort(404)
 
 
-@app.route('/states_list', strict_slashes=False)
+@app.route('/states_list')
 def states_list():
     """ Displays the states sorted by name """
     states_values = get_storage(State).values()
