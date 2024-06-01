@@ -79,7 +79,7 @@ def tear_down(self):
     storage.close()
 
 
-@app.route('/states_list')
+@app.route('/states_list', strict_slashes=False)
 def html_fetch_states():
     """display html page
        fetch sorted states to insert into html in UL tag
