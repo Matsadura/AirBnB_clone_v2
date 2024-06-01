@@ -1,62 +1,54 @@
 #!/usr/bin/python3
-""" module doc
-"""
-from fabric.api import task, local, env, put, run, runs_once
-from datetime import datetime
+""" Packs webstatic into an archive """
 import os
+from fabric.api import *
+from datetime import datetime
+
+env.hosts = ['54.196.38.185', '35.153.232.27']
 
 
-env.hosts = ['100.25.161.163', '52.2.14.222']
-
-
-@runs_once
 def do_pack():
-    """ method doc
-        sudo fab -f 1-pack_web_static.py do_pack
-    """
-    formatted_dt = datetime.now().strftime('%Y%m%d%H%M%S')
-    mkdir = "mkdir -p versions"
-    path = "versions/web_static_{}.tgz".format(formatted_dt)
-    print("Packing web_static to {}".format(path))
-    if local("{} && tar -cvzf {} web_static".format(mkdir, path)).succeeded:
-        return path
+    """ Generates a .tgz archive from web_static """
+    date = datetime.now().strftime("%Y%m%d%H%M%S")
+    full_path = "web_static_" + date
+
+    if not os.path.exists('./versions'):
+        os.mkdir('./versions')
+
+    local(f"tar -cvzf versions/{full_path}.tgz web_static")
+    print(f"Packing web_static to versions/{full_path}.tgz")
+    if os.path.getsize(f"versions/{full_path}.tgz"):
+        size = os.path.getsize(f"versions/{full_path}.tgz")
+        print(f"web_static packed: versions/{full_path} -> {size}Bytes")
+        return f"{full_path}.tgz"
     return None
 
 
-@task
 def do_deploy(archive_path):
-    """ method doc
-        fab -f 2-do_deploy_web_static.py do_deploy:
-        archive_path=versions/web_static_20240111213956.tgz
-        -i ~/.ssh/id_rsa -u ubuntu
-    """
+    """distributes an archive to the web server"""
+    if not os.path.exists(archive_path):
+        return False
     try:
-        if not os.path.exists(archive_path):
-            return False
-        fn_with_ext = os.path.basename(archive_path)
-        fn_no_ext, ext = os.path.splitext(fn_with_ext)
-        dpath = "/data/web_static/releases/"
-        put(archive_path, "/tmp/")
-        run("rm -rf {}{}/".format(dpath, fn_no_ext))
-        run("mkdir -p {}{}/".format(dpath, fn_no_ext))
-        run("tar -xzf /tmp/{} -C {}{}/".format(fn_with_ext, dpath, fn_no_ext))
-        run("rm /tmp/{}".format(fn_with_ext))
-        run("mv {0}{1}/web_static/* {0}{1}/".format(dpath, fn_no_ext))
-        run("rm -rf {}{}/web_static".format(dpath, fn_no_ext))
-        run("rm -rf /data/web_static/current")
-        run("ln -s {}{}/ /data/web_static/current".format(dpath, fn_no_ext))
-        print("New version deployed!")
+        file_n = archive_path.split("/")[-1]
+        not_ext = file_n.split(".")[0]
+        path = "/data/web_static/releases/"
+        put(archive_path, '/tmp/')
+        run(f'mkdir -p {path}{not_ext}/')
+        run(f'tar -xzf /tmp/{file_n} -C {path}{not_ext}/')
+        run(f'rm /tmp/{file_n}')
+        run('mv {0}{1}/web_static/* {0}{1}'.format(path, not_ext))
+        run(f'rm -rf {path}{not_ext}/web_static')
+        run('rm -rf /data/web_static/current')
+        run(f'ln -s {path}{not_ext}/ /data/web_static/current')
         return True
-    except Exception:
+    except Exception as e:
         return False
 
 
-@task
 def deploy():
-    """ method doc
-        sudo fab -f 3-deploy_web_static.py deploy
-    """
+    """ Fully deploys into the webservers """
     path = do_pack()
-    if path is None:
-        return False
-    return do_deploy(path)
+    if path is not None:
+        result = do_deploy(f"versions/{path}")
+        return result
+    return False
