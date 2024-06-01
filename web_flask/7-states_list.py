@@ -6,12 +6,15 @@ from models.state import State
 
 app = Flask(__name__)
 
-tmp = storage.all(State)
-states = tmp.values()
+
+def get_storage(cls=None):
+    """ Returns the database """
+    return storage.all(cls)
 
 
 @app.teardown_appcontext
-def remove_sqlsession(tmp=None):
+def remove_sqlsession(Exception=None):
+    """ Hands the app.teardown """
     storage.close()
 
 
@@ -29,6 +32,7 @@ def hbnb():
 
 @app.route("/c/<text>", strict_slashes=False)
 def c(text):
+    """ Returns C """
     text = text.replace('_', ' ')
     return f"C {escape(text)}"
 
@@ -36,6 +40,7 @@ def c(text):
 @app.route("/python", strict_slashes=False)
 @app.route("/python/<text>", strict_slashes=False)
 def python(text="is cool"):
+    """ Returns Python """
     text = text.replace('_', ' ')
     return f"Python {escape(text)}"
 
@@ -58,6 +63,7 @@ def Number(n):
 
 @app.route("/number_odd_or_even/<n>", strict_slashes=False)
 def number_odd_even(n):
+    """ Returns if the number is odd or even """
     if n.isdigit():
         return render_template('6-number_odd_or_even.html', n=eval(escape(n)))
     abort(404)
@@ -65,7 +71,9 @@ def number_odd_even(n):
 
 @app.route('/states_list', strict_slashes=False)
 def states_list():
-    sorted_states = sorted(states, key=lambda state: state.name)
+    """ Displays the states sorted by name """
+    states_values = get_storage(State).values()
+    sorted_states = sorted(states_values, key=lambda state: state.name)
     return render_template('7-states_list.html', states=sorted_states)
 
 
