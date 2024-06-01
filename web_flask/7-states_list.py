@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-""" Starts a Flask Web Application """
+"""
+    This model starts a Flask web application
+"""
 from flask import Flask, render_template, abort
 from models import storage
 from models.state import State
@@ -8,74 +10,78 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 
 
-def get_storage(cls=None):
-    """ Returns the database """
+def get_db(cls=None):
+    """ This function returns data from storage db/fs """
     return storage.all(cls)
 
 
 @app.teardown_appcontext
-def remove_sqlsession(exception=None):
-    """ Hands the app.teardown """
+def teardown_db(exception=None):
+    """ This function closes the current SQLAlchemy Session """
     storage.close()
 
 
 @app.route("/", strict_slashes=False)
-def root():
-    """ Displays Hello HBNB """
+def home():
+    """Route to display 'Hello HBNB!'."""
     return "Hello HBNB!"
 
 
 @app.route("/hbnb", strict_slashes=False)
 def hbnb():
-    """ Displays HBNB """
+    """Route to display 'HBNB'."""
     return "HBNB"
 
 
 @app.route("/c/<text>", strict_slashes=False)
-def c(text):
-    """ Returns C """
-    text = text.replace('_', ' ')
-    return f"C {escape(text)}"
+def greet_c(text):
+    """Route to display 'C ' followed by string"""
+    return "C {}".format(text.replace("_", " "))
 
 
 @app.route("/python", strict_slashes=False)
 @app.route("/python/<text>", strict_slashes=False)
-def python(text="is cool"):
-    """ Returns Python """
-    text = text.replace('_', ' ')
-    return f"Python {escape(text)}"
+def greet_python(text="is cool"):
+    """Route to display 'python ' followed by a string"""
+    return "python {}".format(text.replace("_", " "))
 
 
 @app.route("/number/<n>", strict_slashes=False)
 def is_number(n):
-    """ Displays 'n is number' only if n is an integer """
+    """Route to display '<n> is a number' if n is a number"""
     if n.isdigit():
-        return f"{escape(n)} is a number"
-    abort(404)
+        return "{} is a Number".format(n)
+    else:
+        abort(404)
 
 
 @app.route("/number_template/<n>", strict_slashes=False)
-def Number(n):
-    """ Displays a HTML page only if n is an integer """
+def display_number(n):
+    """Route to display number using a template."""
     if n.isdigit():
-        return render_template('5-number.html', n=escape(n))
-    abort(404)
+        return render_template("5-number.html", number=n)
+    else:
+        abort(404)
 
 
 @app.route("/number_odd_or_even/<n>", strict_slashes=False)
-def number_odd_even(n):
-    """ Returns if the number is odd or even """
+def display_number_type(n):
+    """Route to display if the number is odd or even using a template"""
     if n.isdigit():
-        return render_template('6-number_odd_or_even.html', n=eval(escape(n)))
-    abort(404)
+        type_n = "even" if int(n) % 2 == 0 else "odd"
+        return render_template("6-number_odd_or_even.html",
+                               number=n, type_n=type_n)
+    else:
+        abort(404)
 
 
-@app.route('/states_list')
+@app.route("/states_list")
 def states_list():
-    """ Displays the states sorted by name """
-    states_values = get_storage(State).values()
-    sorted_states = sorted(states_values, key=lambda state: state.name)
-    return render_template('7-states_list.html', states=sorted_states)
+    """ This function displays an HTML page """
+    state_insts = get_db(State).values()
+    state_insts = sorted(state_insts, key=lambda state: state.name)
+    return render_template("7-states_list.html",
+                           states=state_insts)
 
 
 if __name__ == "__main__":
