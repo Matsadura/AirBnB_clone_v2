@@ -13,7 +13,7 @@ def get_storage(cls=None):
 
 
 @app.teardown_appcontext
-def remove_sqlsession(Exception=None):
+def remove_sqlsession(exception=None):
     """ Hands the app.teardown """
     storage.close()
 
