@@ -72,7 +72,7 @@ def close(error):
 @app.route('/cities_by_states', strict_slashes=False)
 def cities_by_states():
     """ Displays cities by states """
-    states = storage.all(State)
+    states = storage.all(State).values()
     return render_template('8-cities_by_states.html', states=states)
 
 
